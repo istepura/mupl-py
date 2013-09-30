@@ -4,8 +4,7 @@ class BadToken(Exception):
         self.parameter = value
         self.line = line
     def __str__(self):
-        return "".join(["Bad token at line ", str(self.line), ': ', self.parameter])
-
+        return repr("".join(["Bad token at line ", str(self.line), ': ', self.parameter]))
 class Token:
     LB = 0
     RB = 1
@@ -43,7 +42,7 @@ class Lexer(object):
         }
     def init(self, text):
         self.text = text
-        self.idx, self.line = 0, 0
+        self.idx, self.line = 0, 1
 
     def __next(self):
         if self.idx < len(self.text):
@@ -137,10 +136,10 @@ def main():
     l.init("(add (int 3) (int 8))")
     print l.process()
 
-    l.init('''(mlet "f1"
-                               (fun "f1" "a" (mlet "x" (var "a") (fun "f2" "z" (add (var "x") (int 1)))))
+    l.init('''(mlet "f1" (fun "f1" "a" (mlet "x" (var "a") (fun "f2" "z" (add (var "x") (int 1)))))
                                (mlet "f3" (fun "f3" "f" (mlet "x" (int 1729) (call (var "f") (aunit))))
                                      (call (var "f3") (call (var "f1") (int 1))))) ''')
     print l.process()
+
 if __name__ == "__main__":
     main()
