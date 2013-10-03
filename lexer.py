@@ -58,9 +58,8 @@ class Lexer(object):
             self.__next()
         return self.text[start:self.idx-1]
 
-    def __get_token(self):
+    def get_token(self):
         self.__skipws()
-        print self.ch
 
         if self.ch> 0:
             if self.ch == '(':
@@ -100,10 +99,10 @@ class Lexer(object):
     def process(self):
         '''Extracts lexemes from text'''
         res = []
-        tok = self.__get_token()
+        tok = self.get_token()
         while tok[0] != Token.EOF:
             res.append(tok)
-            tok = self.__get_token()
+            tok = self.get_token()
 
         res.append(tok)
         return res 
