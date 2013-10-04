@@ -19,74 +19,75 @@ class Lexer(object):
     def init(self, text):
         self.text = text
         self.idx, self.line = 0, 1
+        self.__next()
 
     def __next(self):
         if self.idx < len(self.text):
-            ch = self.text[self.idx]
+            self.ch  = self.text[self.idx]
             self.idx += 1
-            return ch
         else:
-            return -1
+            self.ch = -1
 
     def __scan_str(self):
         start = self.idx -1
-        ch = self.__next()
-        while ch != '"':
-            if ch < 0:
+        while self.ch != '"':
+            if self.ch < 0:
                 print "string not terminated"
                 return
             else:
-                ch = self.__next()
+                self.__next()
+        self.__next()
         return self.text[start:self.idx]
 
+
     def __skipws(self):
-        ch = self.__next()
-        while  ch > 0 and ch.isspace():
-            if ch == '\n':
+        while  self.ch > 0 and self.ch.isspace():
+            if self.ch == '\n':
                 self.line += 1
-            ch = self.__next()
-        return ch
+            self.__next()
 
     def __scan_num(self):
         start = self.idx - 1
-        ch = self.__next()
-        while ch.isdigit():
-            ch = self.__next()
+        while self.ch.isdigit():
+            self.__next()
         return self.text[start:self.idx-1]
 
     def __scan_symbol(self):
         start = self.idx - 1
-        ch = self.__next()
-        while ch.isalpha():
-            ch = self.__next()
+        while self.ch.isalpha():
+            self.__next()
         return self.text[start:self.idx-1]
 
     def __get_token(self):
-        ch = self.__skipws()
+        self.__skipws()
+        print self.ch
 
-        if ch> 0:
-            if ch == '(':
+        if self.ch> 0:
+            if self.ch == '(':
+                self.__next()
                 return (Token.LB, self.line, '')
-            elif ch == ')':
+            elif self.ch == ')':
+                self.__next()
                 return (Token.RB, self.line, '')
-            elif ch == '"':
+            elif self.ch == '"':
+                self.__next()
                 tk = Token.STRING
                 pos = self.line
                 val = self.__scan_str()
                 if val:
                     return (tk, pos, val)
-            elif ch.isdigit():
+            elif self.ch.isdigit():
                 tk = Token.NUMBER
                 pos = self.line
                 val = self.__scan_num()
                 if val:
                     return (tk, pos, val)
-            elif ch == '#':
+            elif self.ch == '#':
                 if self.__next() == 'f':
                     return (Token.SHARPF, self.line, '')
                 else:
                     raise BadToken(self.line, '')
-            elif ch.isalpha():
+            elif self.ch.isalpha():
                 val = self.__scan_symbol()
 
                 if val and val in self.keywords:
@@ -105,17 +106,4 @@ class Lexer(object):
             tok = self.__get_token()
 
         res.append(tok)
-        return res
-
-def main():
-    l = Lexer()
-    l.init("(add (int 3) (int 8))")
-    print l.process()
-
-    l.init('''(mlet "f1" (fun "f1" "a" (mlet "x" (var "a") (fun "f2" "z" (add (var "x") (int 1)))))
-                               (mlet "f3" (fun "f3" "f" (mlet "x" (int 1729) (call (var "f") (aunit))))
-                                     (call (var "f3") (call (var "f1") (int 1))))) ''')
-    print l.process()
-
-if __name__ == "__main__":
-    main() 
+        return res 

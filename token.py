@@ -5,7 +5,8 @@ class BadToken(Exception):
         self.line = line
     def __str__(self):
         return repr("".join(["Bad token at line ", str(self.line), ': ', self.parameter]))
-class Token:
+
+class Token(object):
     LB = 0
     RB = 1
     NUMBER = 2
@@ -24,3 +25,4 @@ class Token:
     AUNIT = 15
     ISAUNIT = 16
     EOF = 666
+ 
