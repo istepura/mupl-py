@@ -46,7 +46,7 @@ class Parser(object):
             self.__match(Token.INT)
             val = tokenval(self.token)
             self.__match(Token.NUMBER)
-            return Int(Number(val))
+            return Int(val)
         elif tk == Token.MLET:
             self.__match(Token.MLET)
 

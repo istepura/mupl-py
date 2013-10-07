@@ -1,7 +1,16 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
 class Node(object):
-    pass
+    def eval(self, env):
+        pass
+
+class Closure(Node):
+    """ internal class to faciliate functions calls"""
+    def __init__(self, env, expr):
+        self.env = env
+        self.expr = expr
+    def eval(self, env):
+        return self
 
 class Add(Node):
     def __init__(self, n1, n2):
@@ -11,6 +20,13 @@ class Add(Node):
         return "Add(%r, %r)" % (self.n1, self.n2)
     def __str__(self):
         return "(add %s %s)" % (self.n1, self.n2)
+    def eval(self, env):
+        e1 = self.n1.eval(env)
+        e2 = self.n2.eval(env)
+        if isinstance(e1, Int) and isinstance(e2, Int):
+            return Int(int(e1.n) + int(e2.n))
+        else:
+            raise SyntaxError
 
 class Int(Node):
     def __init__(self, n):
@@ -19,14 +35,8 @@ class Int(Node):
         return "Int(%r)" % self.n
     def __str__(self):
         return "(int %s)" % str(self.n)
-
-class Number(Node):
-    def __init__(self, val):
-        self.val = val
-    def __repr__(self):
-        return "Number(%d)" % self.val
-    def __str__(self):
-        return str(self.val)
+    def eval(self, env):
+        return self
 
 class Mlet(Node):
     def __init__(self, name, n1, n2):
@@ -41,15 +51,22 @@ class Fun(Node):
         self.name = name
         self.argname = argname
         self.n = n
-
     def __str__(self):
         return "(fun '%s' '%s' %s)" % (self.name, self.argname, self.n)
+    def eval(self, env):
+        return Closure(env, self)
 
 class Var(Node):
     def __init__(self, name):
         self.name = name
     def __str__(self):
         return '(var "%s")' % self.name
+    def eval(self, env):
+        if self.name in env:
+            return env[self.name]
+        else:
+            print env
+            raise SyntaxError
 
 class Call(Node):
     def __init__(self, n1 ,n2):
@@ -58,6 +75,17 @@ class Call(Node):
 
     def __str__(self):
         return '(call %s %s)' % (self.n1, self.n2)
+    def eval(self, env):
+        func = self.n1.eval(env)
+        arg = self.n2.eval(env)
+
+        if isinstance(func, Closure):
+            newenv = env.copy()
+            newenv[self.n1.name] = func
+            newenv[self.n1.argname] = arg
+            return self.n1.n.eval(newenv)
+        else:
+            raise SyntaxError
 
 class Aunit(Node):
     def __str__(self):
