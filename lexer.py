@@ -83,7 +83,7 @@ class Lexer(object):
                     return (tk, pos, val)
             elif self.ch == '#':
                 if self.__next() == 'f':
-                    return (Token.SHARPF, self.line, '')
+                    return (Token.SHARPF, self.line, '#f')
                 else:
                     raise BadToken(self.line, '')
             elif self.ch.isalpha():
@@ -106,3 +106,6 @@ class Lexer(object):
 
         res.append(tok)
         return res 
+
+def tokenval(token):
+    return token[2]
