@@ -75,6 +75,17 @@ class Lexer(object):
                 pos = self.line
                 if val:
                     return (tk, pos, val)
+            elif self.ch == '-':
+                val = None
+                self.__next()
+                if self.ch.isdigit():
+                    tk = Token.NUMBER
+                    pos = self.line
+                    val = self.__scan_num()
+                if val:
+                    return (tk, pos, '-'+val)
+                else:
+                    raise BadToken(self.line, '-')
             elif self.ch.isdigit():
                 tk = Token.NUMBER
                 pos = self.line
@@ -82,7 +93,8 @@ class Lexer(object):
                 if val:
                     return (tk, pos, val)
             elif self.ch == '#':
-                if self.__next() == 'f':
+                self.__next()
+                if self.ch == 'f':
                     return (Token.SHARPF, self.line, '#f')
                 else:
                     raise BadToken(self.line, '')

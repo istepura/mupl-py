@@ -1,9 +1,19 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
-import copy
-
 class Node(object):
     def eval(self, env):
         pass
+
+class Isaunit(Node):
+    def __init__(self, n):
+        self.n = n
+    def __str__(self):
+        return '(isaunit %s)' % self.n
+    def eval(self, env):
+        e = self.n.eval(env)
+        if isinstance(e, Aunit):
+            return Int(1)
+        else:
+            return Int(0)
 
 class Closure(Node):
     """ internal class to faciliate functions calls"""
@@ -47,7 +57,7 @@ class Mlet(Node):
     def __str__(self):
         return "(mlet '%s' %s %s)" % (self.name, self.n1, self.n2)
     def eval(self, env):
-        newenv = copy.deepcopy(env)
+        newenv = env.copy()
         newenv[self.name] = self.n1.eval(env)
         return self.n2.eval(newenv)
 
@@ -76,7 +86,6 @@ class Call(Node):
     def __init__(self, n1 ,n2):
         self.n1 = n1
         self.n2 = n2
-
     def __str__(self):
         return '(call %s %s)' % (self.n1, self.n2)
     def eval(self, env):
@@ -85,7 +94,7 @@ class Call(Node):
 
         if isinstance(func, Closure):
             fn = func.expr
-            newenv = copy.deepcopy(func.env)
+            newenv = func.env.copy()
             newenv[fn.name] = func
             newenv[fn.argname] = arg
             return fn.n.eval(newenv)
@@ -97,3 +106,61 @@ class Aunit(Node):
         return '(aunit)'
     def eval(self, env):
         return self
+
+class Ifgreater(Node):
+    def __init__(self, n1, n2, n3, n4):
+        self.n1 = n1
+        self.n2 = n2
+        self.n3 = n3
+        self.n4 = n4
+    def __str__(self):
+        return 'ifgreater %s %s %s %s' % (self.n1, self.n2, self.n3, self.n4)
+    def __repr__(self):
+        return 'Ifgreater(%r, %r, %r, %r)' % (self.n1, self.n2, self.n3, self.n4)
+    def eval(self, env):
+        e1 = self.n1.eval(env)
+        e2 = self.n2.eval(env)
+        if isinstance(e1, Int) and isinstance(e2, Int):
+            if int(e1.n) > int(e2.n):
+                return self.n3.eval(env)
+            else:
+                return self.n4.eval(env)
+        else:
+            raise SyntaxError
+
+class Apair(Node):
+    def __init__(self, n1, n2):
+        self.n1 = n1
+        self.n2 = n2
+    def __str__(self):
+        return '(apair %s %s)' % (self.n1, self.n2)
+    def eval(self, env):
+        e1 = self.n1.eval(env)
+        e2 = self.n2.eval(env)
+        return Apair(e1, e2)
+
+class Fst(Node):
+    def __init__(self, n):
+        self.n = n
+    def __str__(self):
+        return '(fst %s)' % self.n
+    def eval(self, env):
+        e1 = self.n.eval(env)
+        if isinstance(e1, Apair):
+            return e1.n1
+        else:
+            raise SyntaxError
+
+class Snd(Node):
+    def __init__(self, n):
+        self.n = n
+    def __str__(self):
+        return '(snd %s)' % self.n
+    def eval(self, env):
+        e = self.n.eval(env)
+        if isinstance(e, Apair):
+            return e.n2
+        else:
+            raise SyntaxError
+
+
