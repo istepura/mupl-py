@@ -1,4 +1,17 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+class ValError(Exception):
+    def __init__(self, expected, actual):
+        self.expected = expected
+        self.actual = actual
+    def __str__(self):
+        return "Expected value of type %s, actual value is %s" % (self.expected, self.actual)
+class UndefinedNameError(Exception):
+    def __init__(self, val):
+        self.val =val
+    def __str__(self):
+        return "Variable name %s is undefined in current environment" % self.val
+
+
 class Node(object):
     def eval(self, env):
         pass
@@ -37,7 +50,8 @@ class Add(Node):
         if isinstance(e1, Int) and isinstance(e2, Int):
             return Int(int(e1.n) + int(e2.n))
         else:
-            raise SyntaxError
+            bad = e1 if type(e1) != Int else e2
+            raise ValError(Int, bad)
 
 class Int(Node):
     def __init__(self, n):
@@ -80,7 +94,7 @@ class Var(Node):
         if self.name in env:
             return env[self.name]
         else:
-            raise SyntaxError
+            raise UndefinedNameError(self.name)
 
 class Call(Node):
     def __init__(self, n1 ,n2):
@@ -99,7 +113,7 @@ class Call(Node):
             newenv[fn.argname] = arg
             return fn.n.eval(newenv)
         else:
-            raise SyntaxError
+            raise ValError(Closure, func)
 
 class Aunit(Node):
     def __str__(self):
@@ -126,7 +140,8 @@ class Ifgreater(Node):
             else:
                 return self.n4.eval(env)
         else:
-            raise SyntaxError
+            bad = e1 if type(e1) != Int else e2
+            raise ValError(Int, bad)
 
 class Apair(Node):
     def __init__(self, n1, n2):
@@ -149,7 +164,7 @@ class Fst(Node):
         if isinstance(e1, Apair):
             return e1.n1
         else:
-            raise SyntaxError
+            raise ValError(Apair, e1)
 
 class Snd(Node):
     def __init__(self, n):
@@ -161,6 +176,6 @@ class Snd(Node):
         if isinstance(e, Apair):
             return e.n2
         else:
-            raise SyntaxError
+            raise ValError(Apair, e)
 
 

@@ -85,7 +85,7 @@ class Lexer(object):
                 if val:
                     return (tk, pos, '-'+val)
                 else:
-                    raise BadToken(self.line, '-')
+                    raise UnknownToken(self.line, '-')
             elif self.ch.isdigit():
                 tk = Token.NUMBER
                 pos = self.line
@@ -95,16 +95,17 @@ class Lexer(object):
             elif self.ch == '#':
                 self.__next()
                 if self.ch == 'f':
+                    self.__next()
                     return (Token.SHARPF, self.line, '#f')
                 else:
-                    raise BadToken(self.line, '')
+                    raise UnknownToken(self.line, self.ch)
             elif self.ch.isalpha():
                 val = self.__scan_symbol()
 
                 if val and val in self.keywords:
                     return (self.keywords[val], self.line, '')
                 else:
-                    raise BadToken(self.line, val)
+                    raise UnknownToken(self.line, val)
         else :
             return (Token.EOF, self.line, '')
 

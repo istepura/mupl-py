@@ -1,10 +1,10 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
-class BadToken(Exception):
+class UnknownToken(Exception):
     def __init__(self, line, value):
         self.parameter = value
         self.line = line
     def __str__(self):
-        return repr("".join(["Bad token at line ", str(self.line), ': ', self.parameter]))
+        return repr("".join(["Unknown token at line ", str(self.line), ': ', self.parameter]))
 
 class Token(object):
     LB = 0
@@ -25,4 +25,4 @@ class Token(object):
     AUNIT = 15
     ISAUNIT = 16
     EOF = 666
- 
+     

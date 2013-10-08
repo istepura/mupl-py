@@ -3,6 +3,8 @@ from token import *
 from lexer import *
 from node import *
 
+class UnexpectedToken(Exception):
+    pass
 class Parser(object):
     def __init__(self, lex):
         self.lx = lex
@@ -24,8 +26,8 @@ class Parser(object):
             self.token = self.lx.get_token()
             return val
         else: 
-            print "Token ", tk, " was not matched ", self.token
-            raise SyntaxError
+       #     print "Token ", tk, " was not matched ", self.token
+            raise UnexpectedToken
 
     def __funname(self):
         tk = self.token
@@ -97,11 +99,8 @@ class Parser(object):
         elif tk == Token.ISAUNIT:
             self.__match(Token.ISAUNIT)
             n = self.__brexp()
-            res = Isaunit(n)
-            print res
-            return res
+            return Isaunit(n)
         elif tk == Token.EOF:
             self.__match(Token.EOF)
         else:
-            print "unmatched token ", self.token
-            raise SyntaxError
+            raise UnexpectedToken()
