@@ -29,7 +29,7 @@ class Lexer(object):
             self.ch = -1
 
     def __scan_str(self):
-        start = self.idx -1
+        start = self.idx -2
         while self.ch != '"':
             if self.ch < 0:
                 print "string not terminated"
@@ -37,7 +37,7 @@ class Lexer(object):
             else:
                 self.__next()
         self.__next()
-        return self.text[start:self.idx]
+        return self.text[start:self.idx-1]
 
 
     def __skipws(self):
@@ -70,9 +70,9 @@ class Lexer(object):
                 return (Token.RB, self.line, '')
             elif self.ch == '"':
                 self.__next()
+                val = self.__scan_str()
                 tk = Token.STRING
                 pos = self.line
-                val = self.__scan_str()
                 if val:
                     return (tk, pos, val)
             elif self.ch.isdigit():

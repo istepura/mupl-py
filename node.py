@@ -1,4 +1,5 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+import copy
 
 class Node(object):
     def eval(self, env):
@@ -45,6 +46,10 @@ class Mlet(Node):
         self.n2 = n2
     def __str__(self):
         return "(mlet '%s' %s %s)" % (self.name, self.n1, self.n2)
+    def eval(self, env):
+        newenv = copy.deepcopy(env)
+        newenv[self.name] = self.n1.eval(env)
+        return self.n2.eval(newenv)
 
 class Fun(Node):
     def __init__(self, name, argname, n):
@@ -65,7 +70,6 @@ class Var(Node):
         if self.name in env:
             return env[self.name]
         else:
-            print env
             raise SyntaxError
 
 class Call(Node):
@@ -80,14 +84,16 @@ class Call(Node):
         arg = self.n2.eval(env)
 
         if isinstance(func, Closure):
-            newenv = env.copy()
-            newenv[self.n1.name] = func
-            newenv[self.n1.argname] = arg
-            return self.n1.n.eval(newenv)
+            fn = func.expr
+            newenv = copy.deepcopy(func.env)
+            newenv[fn.name] = func
+            newenv[fn.argname] = arg
+            return fn.n.eval(newenv)
         else:
             raise SyntaxError
 
 class Aunit(Node):
     def __str__(self):
         return '(aunit)'
-
+    def eval(self, env):
+        return self
