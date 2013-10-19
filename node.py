@@ -1,4 +1,5 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+# -*- coding: utf-8 -*-
 class ValError(Exception):
     def __init__(self, expected, actual):
         self.expected = expected

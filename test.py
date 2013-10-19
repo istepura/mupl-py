@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import unittest
 from lexer import *
 from parser import *
@@ -139,7 +140,7 @@ class TestComplex(ParserTest):
         self.assertEq('(mlet "double" (fun "double" "x" (add (var "x") (var "x")))                                  (call (var "double") (int 10)))', '(int 20)')
 
     def test6(self):
-        self.assertEq('(mlet "range"           (fun "range" "lo"                (fun #f "hi"                     (ifgreater (var "lo") (var "hi") (aunit)                                (apair (var "lo") (call (call (var "range") (add (int 1) (var "lo"))) (var "hi"))))))           (call (call (var "range") (int 5)) (int 8)))', '(apair (int 5) (apair (int 6) (apair (int 7) (apair (int 8) (aunit)))))')
+        self.assertEq(u'(mlet "range"           (fun "range" "lo"                (fun #f "hi"                     (ifgreater (var "lo") (var "hi") (aunit)                                (apair (var "lo") (call (call (var "range") (add (int 1) (var "lo"))) (var "hi"))))))           (call (call (var "range") (int 5)) (int 8)))', '(apair (int 5) (apair (int 6) (apair (int 7) (apair (int 8) (aunit)))))')
     
     def test7(self):
         self.asserEx(ValError, '(call (int 1) (int 2))')
