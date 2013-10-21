@@ -3,9 +3,8 @@
 from token import *
 from lexer import *
 from node import *
+from exception import *
 
-class UnexpectedToken(Exception):
-    pass
 class Parser(object):
     def __init__(self, lex):
         self.lx = lex
@@ -28,7 +27,7 @@ class Parser(object):
             return val
         else: 
        #     print "Token ", tk, " was not matched ", self.token
-            raise UnexpectedToken
+            raise UnexpectedToken(tokencoord(self.token), tk, self.token[0])
 
     def __funname(self):
         tk = self.token
@@ -104,4 +103,4 @@ class Parser(object):
         elif tk == Token.EOF:
             self.__match(Token.EOF)
         else:
-            raise UnexpectedToken()
+            raise UnexpectedToken(tokencoord(self.token), tk, tk)

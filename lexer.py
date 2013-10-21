@@ -1,16 +1,7 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 # -*- coding: utf-8 -*-
 from token import *
-
-class InvalidSymbol(Exception):
-    def __init__(self, line, value):
-        self.parameter = value
-        self.line = line
-    def __str__(self):
-        return repr("".join(["Invalid symbol at line ", str(self.line), ': ', self.parameter]))
-
-class StringNotTerminated(Exception):
-    pass
+from exception import *
 
 class Lexer(object):
     keywords = {
@@ -30,6 +21,7 @@ class Lexer(object):
     def init(self, text):
         self.text = text
         self.idx, self.line = 0, 1
+        self.col = 1
         self.__next()
         self.eof = False
 
@@ -37,6 +29,7 @@ class Lexer(object):
         if self.idx < len(self.text):
             self.ch  = self.text[self.idx]
             self.idx += 1
+            self.col += 1
         else:
             self.eof = True
 
@@ -44,7 +37,7 @@ class Lexer(object):
         start = self.idx -2
         while self.ch != '"':
             if self.eof:
-                raise StringNotTerminated
+                raise StringNotTerminated((self.line, self.col))
             else:
                 self.__next()
         self.__next()
@@ -54,6 +47,7 @@ class Lexer(object):
     def __skipws(self):
         while  not self.eof and self.ch.isspace():
             if self.ch == '\n':
+                self.col = 1
                 self.line += 1
             self.__next()
 
@@ -72,53 +66,56 @@ class Lexer(object):
     def get_token(self):
         self.__skipws()
 
+        pos = (self.line, self.col)
         if not self.eof:
             if self.ch == '(':
                 self.__next()
-                return (Token.LB, self.line, '')
+                return (Token.LB, (self.line, self.col), '')
             elif self.ch == ')':
                 self.__next()
-                return (Token.RB, self.line, '')
+                return (Token.RB, (self.line, self.col), '')
             elif self.ch == '"':
                 self.__next()
+                pos = (self.line, self.col)
                 val = self.__scan_str()
                 tk = Token.STRING
-                pos = self.line
                 if val:
                     return (tk, pos, val)
             elif self.ch == '-':
                 val = None
                 self.__next()
-                if self.ch.isdigit():
+                pos = (self.line, self.col)
+                if not self.eof and self.ch.isdigit():
                     tk = Token.NUMBER
-                    pos = self.line
                     val = self.__scan_num()
                 if val:
                     return (tk, pos, '-'+val)
                 else:
-                    raise InvalidSymbol(self.line, '-')
+                    raise InvalidSymbol(pos, '-')
             elif self.ch.isdigit():
                 tk = Token.NUMBER
-                pos = self.line
+                pos = (self.line, self.col)
                 val = self.__scan_num()
                 if val:
                     return (tk, pos, val)
             elif self.ch == '#':
+                pos = (self.line, self.col)
                 self.__next()
                 if self.ch == 'f':
                     self.__next()
-                    return (Token.SHARPF, self.line, '#f')
+                    return (Token.SHARPF, pos, '#f')
                 else:
-                    raise InvalidSymbol(self.line, self.ch)
+                    raise InvalidSymbol(pos, self.ch)
             elif self.ch.isalpha():
+                pos = (self.line, self.col)
                 val = self.__scan_symbol()
 
                 if val and val in self.keywords:
-                    return (self.keywords[val], self.line, '')
+                    return (self.keywords[val], pos, '')
                 else:
-                    raise InvalidSymbol(self.line, val)
+                    raise InvalidSymbol(pos,  val)
         else :
-            return (Token.EOF, self.line, '')
+            return (Token.EOF, pos, '')
 
     def process(self):
         '''Extracts lexemes from text'''
@@ -133,3 +130,6 @@ class Lexer(object):
 
 def tokenval(token):
     return token[2]
+
+def tokencoord(token):
+    return token[1]
