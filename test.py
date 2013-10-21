@@ -59,6 +59,12 @@ class TestBasic(ParserTest):
         self.asserEx(UnexpectedToken, u'(add (int 1) (int       ')
     def test14(self):
         self.asserEx(InvalidSymbol, u'(add (int 1) (int delta')
+    def test15(self):
+        self.asserEx(InvalidSymbol, u'(add (int 1) (int 1)) #')
+    def test16(self):
+        self.asserEx(UnexpectedToken, u'(add (int 1) (int 1)) #f')
+    def test17(self):
+        self.asserEx(UnexpectedToken, u'"Привет"')
 
 
 class TestAdd(ParserTest):
@@ -141,7 +147,7 @@ class TestComplex(ParserTest):
         res = self.parseToStr(s)
         self.assertEqual(res, "(int 2)")
     def test2(self):
-        s = '(call (fun "incr" "x" (add (var "x") (int 1))) (int 42)))'
+        s = '(call (fun "incr" "x" (add (var "x") (int 1))) (int 42))'
         res = self.parseToStr(s)
         self.assertEqual(res, "(int 43)")
 

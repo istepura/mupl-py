@@ -12,7 +12,9 @@ class Parser(object):
     def parse(self, string):
         self.lx.init(string)
         self.token = self.lx.get_token()
-        return self.__brexp()
+        res = self.__brexp()
+        self.__match(Token.EOF)
+        return res
 
     def __brexp(self):
         self.__match(Token.LB)
