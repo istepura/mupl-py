@@ -47,6 +47,20 @@ class TestBasic(ParserTest):
     def testBadInt2(self):
         self.assertRaises(UnexpectedToken, self.parseToStr, '(int "3")')
 
+    def test10(self):
+        self.asserEx(InvalidSymbol, u'Привет');
+
+    def test11(self):
+        self.asserEx(StringNotTerminated, u'(int 1) "молоко')
+
+    def test12(self):
+        self.asserEx(UnexpectedToken, u'(add (int 1) (int 234555')
+    def test13(self):
+        self.asserEx(UnexpectedToken, u'(add (int 1) (int       ')
+    def test14(self):
+        self.asserEx(InvalidSymbol, u'(add (int 1) (int delta')
+
+
 class TestAdd(ParserTest):
     def test1(self):
         s ="(add (int 3) (int 8))"

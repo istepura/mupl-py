@@ -2,6 +2,16 @@
 # -*- coding: utf-8 -*-
 from token import *
 
+class InvalidSymbol(Exception):
+    def __init__(self, line, value):
+        self.parameter = value
+        self.line = line
+    def __str__(self):
+        return repr("".join(["Invalid symbol at line ", str(self.line), ': ', self.parameter]))
+
+class StringNotTerminated(Exception):
+    pass
+
 class Lexer(object):
     keywords = {
             'add' : Token.ADD,
@@ -21,20 +31,20 @@ class Lexer(object):
         self.text = text
         self.idx, self.line = 0, 1
         self.__next()
+        self.eof = False
 
     def __next(self):
         if self.idx < len(self.text):
             self.ch  = self.text[self.idx]
             self.idx += 1
         else:
-            self.ch = -1
+            self.eof = True
 
     def __scan_str(self):
         start = self.idx -2
         while self.ch != '"':
-            if self.ch < 0:
-                print "string not terminated"
-                return
+            if self.eof:
+                raise StringNotTerminated
             else:
                 self.__next()
         self.__next()
@@ -42,27 +52,27 @@ class Lexer(object):
 
 
     def __skipws(self):
-        while  self.ch > 0 and self.ch.isspace():
+        while  not self.eof and self.ch.isspace():
             if self.ch == '\n':
                 self.line += 1
             self.__next()
 
     def __scan_num(self):
         start = self.idx - 1
-        while self.ch.isdigit():
+        while not self.eof and self.ch.isdigit():
             self.__next()
         return self.text[start:self.idx-1]
 
     def __scan_symbol(self):
         start = self.idx - 1
-        while self.ch.isalpha():
+        while not self.eof and self.ch.isalpha():
             self.__next()
         return self.text[start:self.idx-1]
 
     def get_token(self):
         self.__skipws()
 
-        if self.ch> 0:
+        if not self.eof:
             if self.ch == '(':
                 self.__next()
                 return (Token.LB, self.line, '')
@@ -86,7 +96,7 @@ class Lexer(object):
                 if val:
                     return (tk, pos, '-'+val)
                 else:
-                    raise UnknownToken(self.line, '-')
+                    raise InvalidSymbol(self.line, '-')
             elif self.ch.isdigit():
                 tk = Token.NUMBER
                 pos = self.line
@@ -99,14 +109,14 @@ class Lexer(object):
                     self.__next()
                     return (Token.SHARPF, self.line, '#f')
                 else:
-                    raise UnknownToken(self.line, self.ch)
+                    raise InvalidSymbol(self.line, self.ch)
             elif self.ch.isalpha():
                 val = self.__scan_symbol()
 
                 if val and val in self.keywords:
                     return (self.keywords[val], self.line, '')
                 else:
-                    raise UnknownToken(self.line, val)
+                    raise InvalidSymbol(self.line, val)
         else :
             return (Token.EOF, self.line, '')
 
