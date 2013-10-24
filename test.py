@@ -65,6 +65,16 @@ class TestBasic(ParserTest):
         self.asserEx(UnexpectedToken, u'(add (int 1) (int 1)) #f')
     def test17(self):
         self.asserEx(UnexpectedToken, u'"Привет"')
+    def test18(self):
+        self.asserEx(UnexpectedToken, u'(int 1) "молоко"')
+    def test19(self):
+        self.asserEx(InvalidSymbol, ';(int 1)')
+    def test20(self):
+        self.asserEx(UnexpectedToken, '')
+    def test21(self):
+        self.asserEx(UnexpectedToken, ' ')
+    def test22(self):
+        self.asserEx(InvalidSymbol, '-  23')
 
 
 class TestAdd(ParserTest):
@@ -109,7 +119,6 @@ class TesApair(ParserTest):
 
     def test4(self):
         self.assertEq('(mlet "x" (apair (int 1) (int 2)) (fst (var "x")))', '(int 1)')
-    
     def test5(self):
         self.assertRaises(ValError, self.parseToStr, '(fst (add (int 1) (int 2)))')
         self.assertRaises(ValError, self.parseToStr, '(snd (add (int 1) (int 2)))')
@@ -161,7 +170,7 @@ class TestComplex(ParserTest):
 
     def test6(self):
         self.assertEq(u'(mlet "range"           (fun "range" "lo"                (fun #f "hi"                     (ifgreater (var "lo") (var "hi") (aunit)                                (apair (var "lo") (call (call (var "range") (add (int 1) (var "lo"))) (var "hi"))))))           (call (call (var "range") (int 5)) (int 8)))', '(apair (int 5) (apair (int 6) (apair (int 7) (apair (int 8) (aunit)))))')
-    
+
     def test7(self):
         self.asserEx(ValError, '(call (int 1) (int 2))')
 

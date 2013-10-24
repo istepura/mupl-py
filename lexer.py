@@ -22,8 +22,8 @@ class Lexer(object):
         self.text = text
         self.idx, self.line = 0, 1
         self.col = 1
-        self.__next()
         self.eof = False
+        self.__next()
 
     def __next(self):
         if self.idx < len(self.text):
@@ -114,6 +114,8 @@ class Lexer(object):
                     return (self.keywords[val], pos, '')
                 else:
                     raise InvalidSymbol(pos,  val)
+            else:
+                raise InvalidSymbol(pos, self.ch)
         else :
             return (Token.EOF, pos, '')
 
@@ -126,7 +128,7 @@ class Lexer(object):
             tok = self.get_token()
 
         res.append(tok)
-        return res 
+        return res
 
 def tokenval(token):
     return token[2]
