@@ -5,6 +5,8 @@ from token import *
 class ParserException(Exception):
     def __init__(self, coord):
         self.coord = coord
+    def __str__(sefl):
+        return repr("".join(['Error at line ', self.coord[0]]))
 
 class InvalidSymbol(ParserException):
     def __init__(self, coord, value):

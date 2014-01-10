@@ -52,7 +52,7 @@ class Add(Node):
             return Int(int(e1.n) + int(e2.n))
         else:
             bad = e1 if type(e1) != Int else e2
-            raise ValError(Int, bad)
+            raise ValError('(int)', bad)
 
 class Int(Node):
     def __init__(self, n):
